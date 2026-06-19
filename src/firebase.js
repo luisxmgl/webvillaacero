@@ -6,18 +6,16 @@
 
 // Your web app's Firebase configuration (from Firebase console)
 const firebaseConfig = {
-  apiKey: "AIzaSyBxBQYbWslQZOrqpHeTbADKAGqOJGTSXqQ",
-  authDomain: "apptienda-3302c.firebaseapp.com",
-  projectId: "apptienda-3302c",
-  storageBucket: "apptienda-3302c.firebasestorage.app",
-  messagingSenderId: "803122927653",
-  appId: "1:803122927653:web:e822cd17e73bb9e011c7cc",
-  measurementId: "G-1CYLWM2PV4",
-  // NOTE: Realtime Database URL is not always included in the web snippet.
-  // If your project uses Realtime Database, ensure this matches your DB URL.
-  // Example (may be correct):
-  // databaseURL: "https://apptienda-3302c-default-rtdb.firebaseio.com",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL
 }
+
 
 import { initializeApp } from "firebase/app"
 import { getDatabase } from "firebase/database"
