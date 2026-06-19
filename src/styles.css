@@ -81,7 +81,7 @@ button {
 .slide-frame {
   width: 100%;
   max-width: 800px;
-  height: 220px;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
   position: relative;
   margin: 0 auto;
@@ -269,10 +269,6 @@ button {
 }
 
 @media (max-width: 520px) {
-  .slide-frame {
-    height: 96px;
-  }
-
   .logo-chip {
     width: 36px;
     height: 36px;
@@ -929,6 +925,15 @@ button:focus-visible {
 
 .chat-bubble .message-text {
   white-space: pre-wrap;
+}
+
+.chat-bubble-image {
+  display: block;
+  max-width: 100%;
+  width: 220px;
+  height: auto;
+  border-radius: 14px;
+  object-fit: cover;
 }
 
 .chat-bubble-typing .message-text {

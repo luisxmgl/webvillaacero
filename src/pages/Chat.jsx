@@ -23,6 +23,7 @@ export default function Chat({ admin = false }) {
   const bottomRef = useRef(null)
   const greetedRef = useRef(false)
   const awaitingOrderCodeRef = useRef(false)
+  const fileInputRef = useRef(null)
 
   useEffect(() => {
     if (admin) return
@@ -216,6 +217,49 @@ export default function Chat({ admin = false }) {
     enviarTexto(text)
   }
 
+  function readAndCompressImage(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => {
+        const img = new window.Image()
+        img.onload = () => {
+          const maxDim = 1024
+          let { width, height } = img
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width)
+              width = maxDim
+            } else {
+              width = Math.round((width * maxDim) / height)
+              height = maxDim
+            }
+          }
+          const canvas = document.createElement("canvas")
+          canvas.width = width
+          canvas.height = height
+          canvas.getContext("2d").drawImage(img, 0, 0, width, height)
+          resolve(canvas.toDataURL("image/jpeg", 0.7))
+        }
+        img.onerror = reject
+        img.src = reader.result
+      }
+      reader.onerror = reject
+      reader.readAsDataURL(file)
+    })
+  }
+
+  async function handleImageSelected(e) {
+    const file = e.target.files?.[0]
+    e.target.value = ""
+    if (!file) return
+    try {
+      const imageUrl = await readAndCompressImage(file)
+      persistMessage({ senderId: currentUserId, imageUrl, timestamp: Date.now() })
+    } catch (err) {
+      console.error("Error al procesar la imagen:", err)
+    }
+  }
+
   useEffect(() => {
     if (admin || !chatId || !loaded || messages.length > 0 || greetedRef.current) return
     greetedRef.current = true
@@ -273,7 +317,11 @@ export default function Chat({ admin = false }) {
           const timeText = m.timestamp ? new Date(m.timestamp).toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" }) : ""
           return (
             <div key={i} className={`chat-bubble ${m.senderId === currentUserId ? "user" : "bot"}`}>
-              <div className="message-text">{m.text}</div>
+              {m.imageUrl ? (
+                <img src={m.imageUrl} alt={t("chat.photoAlt")} className="chat-bubble-image" />
+              ) : (
+                <div className="message-text">{m.text}</div>
+              )}
               <div className="message-meta">
                 <span>{senderLabel}</span>
                 <span>{timeText}</span>
@@ -314,6 +362,23 @@ export default function Chat({ admin = false }) {
           </div>
         )}
         <div style={{ display: "flex", gap: 8 }}>
+          <input
+            type="file"
+            accept="image/*"
+            ref={fileInputRef}
+            onChange={handleImageSelected}
+            style={{ display: "none" }}
+          />
+          <button
+            type="button"
+            className="btn btn-ghost"
+            style={{ width: "auto", padding: "11px 14px" }}
+            aria-label={t("chat.attachPhoto")}
+            title={t("chat.attachPhoto")}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Icon name="image" size={18} />
+          </button>
           <input
             placeholder={t("chat.inputPlaceholder")}
             value={text}
