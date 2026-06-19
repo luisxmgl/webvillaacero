@@ -11,9 +11,10 @@ const PORT = process.env.PORT || 3000;
 // Servir la carpeta dist generada por vite build
 app.use(express.static(path.join(__dirname, "dist")));
 
-app.get("*", (req, res) => {
+app.get("/*", (req, res) => {
   res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
+
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto ${PORT}`);
