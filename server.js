@@ -11,7 +11,11 @@ const PORT = process.env.PORT || 3000;
 // Servir la carpeta dist generada por vite build
 app.use(express.static(path.join(__dirname, "dist")));
 
-app.get("/*", (req, res) => {
+// Servir archivos estáticos de dist
+app.use(express.static(path.join(__dirname, "dist")));
+
+// Capturar cualquier ruta y devolver index.html
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
 
