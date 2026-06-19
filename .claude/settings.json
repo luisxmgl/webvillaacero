@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e ' *)",
+      "Bash(rm -f _verify2.cjs _v2_colegios_guest.png _v2_chat_guest.png _v2_colegios_admin.png _v2_chat_guest2.png _v2_chat_full.png _chat_dom.html _v3_chat_fixed.png _v4_chat_msg.png)",
+      "Bash(rm -rf node_modules/playwright node_modules/playwright-core)",
+      "Bash(rm -f _check_logo_wide.png _check_logo_narrow.png _check_sobre.png _check_sobre2.png _check_logo_narrow2.png _check_crop.png _check_crop2.png _check_wide_final.png)",
+      "Bash(find /c/Users/Luis/AppData/Local/Temp -iname \"*.png\" -newermt \"-1 hour\" 2>/dev/null | head -20; echo \"---\"; find /c/Users/Luis/AppData/Roaming -iname \"*paste*\" -newermt \"-1 hour\" 2>/dev/null | head -10)",
+      "Read(//c/Users/Luis/AppData/Roaming/**)",
+      "Bash(node --input-type=module -e ' *)"
+    ]
+  }
+}
