@@ -1,9 +1,32 @@
-import { createContext, useContext, useState } from "react"
+import { createContext, useContext, useEffect, useRef, useState } from "react"
+import { useLocation } from "react-router-dom"
+import { getCurrentIdentity, resetPersonalState } from "../utils.js"
 
 const CartContext = createContext(null)
 
 export function CartProvider({ children }) {
   const [items, setItems] = useState([])
+  const location = useLocation()
+  const identityRef = useRef(null)
+
+  // El carrito vive en memoria durante toda la sesión del navegador, sin importar
+  // qué pantalla se visite -- pero admin e invitados (y un invitado distinto que
+  // use el mismo equipo) son personas distintas. Cada vez que la identidad actual
+  // cambia (lo cual siempre ocurre junto con una navegación: login o "cerrar
+  // sesión"), se vacía el carrito y el estado personal (puntos, pedidos
+  // guardados) para que nadie vea lo que eligió la persona anterior.
+  useEffect(() => {
+    const current = getCurrentIdentity()
+    if (identityRef.current === null) {
+      identityRef.current = current
+      return
+    }
+    if (current !== identityRef.current) {
+      identityRef.current = current
+      setItems([])
+      resetPersonalState()
+    }
+  }, [location.key])
 
   function addItem(producto) {
     setItems((prev) => {

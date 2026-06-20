@@ -1,6 +1,7 @@
 {
   "permissions": {
     "allow": [
+      "Bash",
       "Skill(run)",
       "Skill(run:*)",
       "Bash(chromium-cli --session villaacero)",

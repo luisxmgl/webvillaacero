@@ -16,11 +16,81 @@ function estadoLabel(estado, t) {
   return estado === 4 ? t("adminOrders.estado4") : t(`tracking.estado${estado}`)
 }
 
+function computeAdminLocalChatNotifications(t) {
+  const fresh = []
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i)
+    if (!key || !key.startsWith("mock_chat_")) continue
+    const chatId = key.replace("mock_chat_", "")
+    try {
+      const list = JSON.parse(localStorage.getItem(key) || "[]").sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0))
+      const last = list[list.length - 1]
+      if (!last || last.senderId === "admin" || last.senderId === "bot") continue
+      const rawSeen = localStorage.getItem(`opened_chat_${chatId}`)
+      const seenAt = rawSeen === "1" ? Infinity : Number(rawSeen) || 0
+      if ((last.timestamp || 0) > seenAt) {
+        fresh.push({
+          id: `chat_${chatId}`,
+          type: "chat",
+          text: t("notifications.newChatAdmin", { name: chatId }),
+          timestamp: last.timestamp || 0,
+          link: `/admin/chat/${chatId}`,
+        })
+      }
+    } catch {
+      // ignore malformed mock chat entries
+    }
+  }
+  return fresh
+}
+
+function computeGuestLocalChatNotifications(t) {
+  const guestId = getGuestId()
+  try {
+    const list = JSON.parse(localStorage.getItem(`mock_chat_${guestId}`) || "[]").sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0))
+    const last = list[list.length - 1]
+    if (!last || last.senderId === guestId) return []
+    const seenAt = Number(localStorage.getItem(SEEN_CHAT_KEY(guestId))) || 0
+    if ((last.timestamp || 0) <= seenAt) return []
+    return [
+      {
+        id: `chat_${guestId}`,
+        type: "chat",
+        text: t("notifications.chatNewMessageAdmin"),
+        timestamp: last.timestamp || 0,
+        link: "/chat",
+      },
+    ]
+  } catch {
+    return []
+  }
+}
+
 export function useNotifications(isAdmin, t) {
   const [items, setItems] = useState([])
 
   useEffect(() => {
-    if (!db) return
+    // isAdmin cambió (o el hook se monta de nuevo): las notificaciones calculadas
+    // bajo la identidad anterior no le pertenecen a la nueva, así que se descartan
+    // de inmediato en vez de esperar a que la próxima lectura las reemplace.
+    setItems([])
+
+    if (!db) {
+      // Sin Firebase configurado, los mensajes viven en localStorage (mock_chat_*,
+      // ver Chat.jsx) -- se recalcula igual para que el punto/campana de mensajes
+      // pendientes funcione también en este modo de desarrollo sin conexión.
+      const recompute = () => {
+        const fresh = isAdmin ? computeAdminLocalChatNotifications(t) : computeGuestLocalChatNotifications(t)
+        setItems((prev) => mergeByType(prev, "chat", fresh))
+      }
+      recompute()
+      window.addEventListener("storage", recompute)
+      window.addEventListener("va-local-chat-updated", recompute)
+      return () => {
+        window.removeEventListener("storage", recompute)
+        window.removeEventListener("va-local-chat-updated", recompute)
+      }
+    }
     const unsubs = []
 
     if (isAdmin) {
@@ -32,7 +102,7 @@ export function useNotifications(isAdmin, t) {
           Object.entries(data).forEach(([chatId, msgsObj]) => {
             const list = Object.values(msgsObj || {}).sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0))
             const last = list[list.length - 1]
-            if (!last || last.senderId === "admin") return
+            if (!last || last.senderId === "admin" || last.senderId === "bot") return
             const rawSeen = localStorage.getItem(`opened_chat_${chatId}`)
             const seenAt = rawSeen === "1" ? Infinity : Number(rawSeen) || 0
             if ((last.timestamp || 0) > seenAt) {

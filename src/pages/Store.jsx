@@ -44,6 +44,11 @@ export default function Store() {
     return productos.filter((p) => p.nombre.startsWith(filtro))
   }, [productos, filtro])
 
+  function selectFiltro(c) {
+    setFiltro(c)
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
   const cartCount = items.reduce((s, i) => s + i.cantidad, 0)
 
   return (
@@ -62,7 +67,7 @@ export default function Store() {
       <div className="content">
         <div className="chip-row" style={{ marginBottom: 18, overflowX: "auto", flexWrap: "nowrap" }}>
           {categorias.map((c) => (
-            <button key={c} className={`chip ${filtro === c ? "active" : ""}`} onClick={() => setFiltro(c)} style={{ flexShrink: 0 }}>
+            <button key={c} className={`chip ${filtro === c ? "active" : ""}`} onClick={() => selectFiltro(c)} style={{ flexShrink: 0 }}>
               {categoryLabel(c)}
             </button>
           ))}

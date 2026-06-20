@@ -1,7 +1,6 @@
 // Equivalente web de Utils.kt, los getters de Producto.kt y PointsManager.kt
 
-const WHATSAPP_NUMBER = "56920680021"
-const WEBPAY_URL = "https://www.webpay.cl/form-pay/392941"
+export const WHATSAPP_NUMBER = "56920680021"
 
 export function formatPrice(precio) {
   return new Intl.NumberFormat("es-CL", {
@@ -82,10 +81,6 @@ export function openWhatsApp(message, phone = WHATSAPP_NUMBER) {
   window.open(url, "_blank")
 }
 
-export function openWebpay() {
-  window.open(WEBPAY_URL, "_blank")
-}
-
 export function generateOrderCode() {
   const now = new Date()
   const dd = String(now.getDate()).padStart(2, "0")
@@ -143,4 +138,17 @@ export function getGuestId() {
     localStorage.setItem("villaacero_guest_id", id)
   }
   return id
+}
+
+// --- Identidad de la sesión actual: distingue admin de cada invitado, para que
+// el carrito, los puntos y los pedidos de una persona no se filtren a la siguiente
+// persona que use el mismo navegador (ver CartContext.jsx, donde se usa para
+// limpiar el estado personal cada vez que la identidad cambia). ---
+export function getCurrentIdentity() {
+  return localStorage.getItem("va_isAdmin") === "1" ? "admin" : getGuestId()
+}
+
+export function resetPersonalState() {
+  localStorage.removeItem(POINTS_KEY)
+  localStorage.removeItem(ORDERS_KEY)
 }

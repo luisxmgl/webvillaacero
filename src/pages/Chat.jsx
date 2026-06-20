@@ -1,12 +1,10 @@
 import { useEffect, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import { ref, push, set, get, onValue, onDisconnect } from "firebase/database"
+import { ref, push, set, onValue, onDisconnect } from "firebase/database"
 import { db } from "../firebase.js"
 import { getGuestId } from "../utils.js"
 import Icon from "../components/Icons.jsx"
 import { useLanguage } from "../context/LanguageContext.jsx"
-import { buildDefaultRules, matchRule, extractOrderCode } from "../chatbot/rules.js"
-import { pushUnansweredQuestion, subscribeCustomRules } from "../chatbot/queue.js"
 
 export default function Chat({ admin = false }) {
   const navigate = useNavigate()
@@ -16,17 +14,17 @@ export default function Chat({ admin = false }) {
   const chatId = admin ? targetId : currentUserId
 
   const [messages, setMessages] = useState([])
-  const [loaded, setLoaded] = useState(false)
   const [text, setText] = useState("")
-  const [botTyping, setBotTyping] = useState(false)
-  const [customRules, setCustomRules] = useState([])
   const bottomRef = useRef(null)
-  const greetedRef = useRef(false)
-  const awaitingOrderCodeRef = useRef(false)
 
   useEffect(() => {
-    if (admin) return
-    return subscribeCustomRules(setCustomRules)
+    // El admin tiene su propia vista de chats (/admin/mensajes); si llega aquí
+    // (por ejemplo escribiendo /chat directo en la URL) no debe usar la
+    // identidad de invitado de este navegador, que es de otra persona.
+    if (!admin && localStorage.getItem("va_isAdmin") === "1") {
+      navigate("/admin/mensajes", { replace: true })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [admin])
 
   useEffect(() => {
@@ -59,6 +57,16 @@ export default function Chat({ admin = false }) {
     function markSeen() {
       if (admin) localStorage.setItem(`opened_chat_${chatId}`, String(Date.now()))
       else localStorage.setItem(`va_seen_chat_${currentUserId}`, String(Date.now()))
+      window.dispatchEvent(new Event("va-local-chat-updated"))
+    }
+
+    // First scroll on a freshly opened chat should land instantly at the bottom
+    // (no visible animated jump); later updates scroll smoothly.
+    let isFirstScroll = true
+    function scrollToBottom() {
+      const behavior = isFirstScroll ? "auto" : "smooth"
+      isFirstScroll = false
+      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior, block: "end" }), 50)
     }
 
     if (db) {
@@ -68,9 +76,8 @@ export default function Chat({ admin = false }) {
           const data = snap.val() || {}
           const list = Object.values(data).sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0))
           setMessages(list)
-          setLoaded(true)
           markSeen()
-          if (list.length) setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 50)
+          if (list.length) scrollToBottom()
         })
         return () => {
           try {
@@ -94,12 +101,10 @@ export default function Chat({ admin = false }) {
     try {
       const stored = JSON.parse(localStorage.getItem(key) || "[]")
       setMessages(stored)
-      setLoaded(true)
       markSeen()
-      if (stored.length) setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 50)
+      if (stored.length) scrollToBottom()
     } catch {
       setMessages([])
-      setLoaded(true)
     }
     const onStorage = (e) => {
       if (e.key === key) {
@@ -137,71 +142,12 @@ export default function Chat({ admin = false }) {
       stored.push(payload)
       localStorage.setItem(key, JSON.stringify(stored))
       setMessages(stored)
+      // Permite que useNotifications recalcule de inmediato en la misma pestaña
+      // (el evento "storage" nativo solo dispara en otras pestañas).
+      window.dispatchEvent(new Event("va-local-chat-updated"))
     } catch (e) {
       console.error("Error saving mock message", e)
     }
-  }
-
-  function sendBotMessage(value) {
-    persistMessage({ senderId: "bot", text: value, timestamp: Date.now() })
-  }
-
-  function estadoLabel(estado) {
-    return estado === 4 ? t("adminOrders.estado4") : t(`tracking.estado${estado}`)
-  }
-
-  function notaForEstado(estado) {
-    if (estado === 1) return t("tracking.nota1")
-    if (estado === 2) return t("tracking.nota2")
-    if (estado === 3) return t("tracking.nota3")
-    return ""
-  }
-
-  async function runBot(userText) {
-    setBotTyping(true)
-    const delay = 600 + Math.random() * 500
-
-    if (awaitingOrderCodeRef.current) {
-      awaitingOrderCodeRef.current = false
-      const code = extractOrderCode(userText)
-      setTimeout(async () => {
-        setBotTyping(false)
-        if (!code) {
-          sendBotMessage(t("chatbot.orderNotFound", { code: userText.trim() }))
-          return
-        }
-        try {
-          const snap = db ? await get(ref(db, `pedidos/${code}`)) : null
-          if (snap && snap.exists()) {
-            const p = snap.val()
-            sendBotMessage(t("chatbot.orderStatus", { code, status: estadoLabel(p.estado), note: notaForEstado(p.estado) }))
-          } else {
-            sendBotMessage(t("chatbot.orderNotFound", { code }))
-          }
-        } catch (e) {
-          sendBotMessage(t("chatbot.orderNotFound", { code }))
-        }
-      }, delay)
-      return
-    }
-
-    const allRules = [...customRules, ...buildDefaultRules(t)]
-    const rule = matchRule(userText, allRules)
-
-    setTimeout(() => {
-      setBotTyping(false)
-      if (!rule) {
-        sendBotMessage(t("chatbot.fallback"))
-        pushUnansweredQuestion({ chatId, text: userText })
-        return
-      }
-      if (rule.action === "ASK_ORDER_CODE") {
-        awaitingOrderCodeRef.current = true
-        sendBotMessage(t("chatbot.askOrderCode"))
-        return
-      }
-      sendBotMessage(rule.answer)
-    }, delay)
   }
 
   function enviarTexto(value) {
@@ -209,19 +155,11 @@ export default function Chat({ admin = false }) {
     if (!trimmed) return
     persistMessage({ senderId: currentUserId, text: trimmed, timestamp: Date.now() })
     setText("")
-    if (!admin) runBot(trimmed)
   }
 
   function enviar() {
     enviarTexto(text)
   }
-
-  useEffect(() => {
-    if (admin || !chatId || !loaded || messages.length > 0 || greetedRef.current) return
-    greetedRef.current = true
-    sendBotMessage(t("chatbot.greeting"))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [admin, chatId, loaded, messages.length])
 
   function getSenderLabel(senderId) {
     if (senderId === currentUserId) return t("chat.senderYou")
@@ -244,7 +182,7 @@ export default function Chat({ admin = false }) {
             className="btn-logout"
             onClick={() => {
               localStorage.removeItem("villaacero_guest_id")
-              navigate("/admin/login")
+              navigate("/")
             }}
             style={{ marginLeft: 8 }}
             title={t("chat.guestLogout")}
@@ -282,11 +220,6 @@ export default function Chat({ admin = false }) {
           )
         })}
 
-        {botTyping && (
-          <div className="chat-bubble bot chat-bubble-typing">
-            <div className="message-text">{t("chat.botTyping")}</div>
-          </div>
-        )}
         <div ref={bottomRef} />
       </div>
 
@@ -303,7 +236,7 @@ export default function Chat({ admin = false }) {
           gap: 8,
           padding: 12,
           background: "var(--paper)",
-          borderTop: "1px dashed var(--line)",
+          borderTop: "1px solid var(--line)",
         }}
       >
         {!admin && (

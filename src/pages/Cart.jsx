@@ -7,7 +7,6 @@ import { useLanguage } from "../context/LanguageContext.jsx"
 import {
   formatPrice,
   openWhatsApp,
-  openWebpay,
   generateOrderCode,
   saveLocalOrder,
   addPoints,
@@ -20,9 +19,11 @@ export default function Cart() {
   const navigate = useNavigate()
   const { items, updateQuantity, removeItem, clear, total } = useCart()
   const { t } = useLanguage()
+  const isAdmin = localStorage.getItem("va_isAdmin") === "1"
   const [showAssistant, setShowAssistant] = useState(false)
   const [pendingMethod, setPendingMethod] = useState(null) // "whatsapp" | "webpay"
   const [confirmedCode, setConfirmedCode] = useState(null)
+  const [webpayError, setWebpayError] = useState("")
 
   const pointsToEarn = calculateTotalPoints(items)
 
@@ -33,6 +34,7 @@ export default function Cart() {
 
   async function onAssistantComplete(extraCharge, customization) {
     setShowAssistant(false)
+    setWebpayError("")
     const orderCode = generateOrderCode()
     const totalFinal = total + extraCharge
 
@@ -52,6 +54,7 @@ export default function Cart() {
       estado: 1,
       fecha: Date.now(),
       procesado: false,
+      ...(pendingMethod === "webpay" ? { metodoPago: "webpay", pagado: false } : {}),
     }
 
     saveLocalOrder(orderCode)
@@ -63,21 +66,45 @@ export default function Cart() {
 
     addPoints(pointsToEarn)
 
-    if (pendingMethod === "whatsapp") {
-      let msg = `${t("cart.orderMessageHeader")}\n\n${t("cart.orderCodeLabel")}: ${orderCode}\n------------------------------\n`
-      items.forEach((i) => {
-        msg += `• ${i.producto.nombre}\n  ${t("cart.quantityLabel")}: ${i.cantidad}\n`
-        if (i.producto.colegio) msg += `  ${t("cart.schoolLabel")}: ${i.producto.colegio}\n`
-        msg += "\n"
-      })
-      if (customization) {
-        msg += `${t("cart.adjustmentsLabel")}: ${customization}\n${t("cart.extraChargeLabel")}: ${formatPrice(extraCharge)}\n\n`
+    if (pendingMethod === "webpay") {
+      try {
+        const resp = await fetch("/api/webpay/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orderCode, amount: totalFinal }),
+        })
+        if (!resp.ok) throw new Error("create failed")
+        const { token, url } = await resp.json()
+        // Transbank exige un POST real del navegador con token_ws, no un fetch/XHR.
+        const form = document.createElement("form")
+        form.method = "POST"
+        form.action = url
+        const input = document.createElement("input")
+        input.type = "hidden"
+        input.name = "token_ws"
+        input.value = token
+        form.appendChild(input)
+        document.body.appendChild(form)
+        form.submit()
+        return // el navegador sale del sitio; no limpiar el carrito todavía
+      } catch (e) {
+        console.error("Error iniciando pago Webpay", e)
+        setWebpayError(t("cart.webpayError"))
+        return
       }
-      msg += `${t("cart.finalTotalLabel")}: ${formatPrice(totalFinal)}\n\n*${t("cart.changeNote")}*`
-      openWhatsApp(msg)
-    } else {
-      openWebpay()
     }
+
+    let msg = `${t("cart.orderMessageHeader")}\n\n${t("cart.orderCodeLabel")}: ${orderCode}\n------------------------------\n`
+    items.forEach((i) => {
+      msg += `• ${i.producto.nombre}\n  ${t("cart.quantityLabel")}: ${i.cantidad}\n`
+      if (i.producto.colegio) msg += `  ${t("cart.schoolLabel")}: ${i.producto.colegio}\n`
+      msg += "\n"
+    })
+    if (customization) {
+      msg += `${t("cart.adjustmentsLabel")}: ${customization}\n${t("cart.extraChargeLabel")}: ${formatPrice(extraCharge)}\n\n`
+    }
+    msg += `${t("cart.finalTotalLabel")}: ${formatPrice(totalFinal)}\n\n*${t("cart.changeNote")}*`
+    openWhatsApp(msg)
 
     clear()
     setConfirmedCode(orderCode)
@@ -152,17 +179,30 @@ export default function Cart() {
                 <span>{t("cart.total")}</span>
                 <span style={{ color: "var(--thread)" }}>{formatPrice(total)}</span>
               </div>
-              <p style={{ fontSize: 12.5, color: "var(--muted)", marginTop: 8 }}>
-                {t("cart.pointsEarn", { points: pointsToEarn })}
-              </p>
+              {!isAdmin && (
+                <p style={{ fontSize: 12.5, color: "var(--muted)", marginTop: 8 }}>
+                  {t("cart.pointsEarn", { points: pointsToEarn })}
+                </p>
+              )}
             </div>
 
-            <button className="btn btn-primary" style={{ marginTop: 16 }} onClick={() => iniciarCheckout("whatsapp")}>
-              {t("cart.checkoutWhatsapp")}
-            </button>
-            <button className="btn btn-secondary" style={{ marginTop: 10 }} onClick={() => iniciarCheckout("webpay")}>
-              {t("cart.checkoutWebpay")}
-            </button>
+            {isAdmin ? (
+              <button className="btn btn-primary" style={{ marginTop: 16 }} onClick={() => navigate("/admin/caja")}>
+                {t("cart.checkoutAtCaja")}
+              </button>
+            ) : (
+              <>
+                <button className="btn btn-primary" style={{ marginTop: 16 }} onClick={() => iniciarCheckout("whatsapp")}>
+                  {t("cart.checkoutWhatsapp")}
+                </button>
+                <button className="btn btn-secondary" style={{ marginTop: 10 }} onClick={() => iniciarCheckout("webpay")}>
+                  {t("cart.checkoutWebpay")}
+                </button>
+                {webpayError && (
+                  <p style={{ fontSize: 13, color: "var(--thread)", marginTop: 8, textAlign: "center" }}>{webpayError}</p>
+                )}
+              </>
+            )}
           </>
         )}
       </div>

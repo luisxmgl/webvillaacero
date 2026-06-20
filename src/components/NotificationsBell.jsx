@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useLanguage } from "../context/LanguageContext.jsx"
-import { useNotifications } from "../hooks/useNotifications.js"
 
-export default function NotificationsBell({ isAdmin }) {
+const GROUP_TYPES = ["chat", "order"]
+
+export default function NotificationsBell({ items, markSeen, markAllSeen }) {
   const { t } = useLanguage()
   const navigate = useNavigate()
-  const { items, markSeen, markAllSeen } = useNotifications(isAdmin, t)
   const [open, setOpen] = useState(false)
   const wrapperRef = useRef(null)
 
@@ -52,15 +52,26 @@ export default function NotificationsBell({ isAdmin }) {
           {items.length === 0 ? (
             <p className="notif-empty">{t("notifications.empty")}</p>
           ) : (
-            <ul className="notif-list">
-              {items.map((n) => (
-                <li key={n.id}>
-                  <button type="button" className={`notif-item notif-item-${n.type}`} onClick={() => openNotification(n)}>
-                    {n.text}
-                  </button>
-                </li>
-              ))}
-            </ul>
+            <div className="notif-groups">
+              {GROUP_TYPES.map((type) => {
+                const group = items.filter((n) => n.type === type)
+                if (!group.length) return null
+                return (
+                  <div className="notif-group" key={type}>
+                    <div className="notif-group-title">{t(`notifications.group.${type}`)}</div>
+                    <ul className="notif-list">
+                      {group.map((n) => (
+                        <li key={n.id}>
+                          <button type="button" className={`notif-item notif-item-${n.type}`} onClick={() => openNotification(n)}>
+                            {n.text}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )
+              })}
+            </div>
           )}
         </div>
       )}

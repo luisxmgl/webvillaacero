@@ -73,6 +73,11 @@ export default function SchoolSelector() {
     return matchComuna && matchSearch
   })
 
+  function selectComuna(c) {
+    setComuna(c)
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
   return (
     <div className="screen">
       <div className="topbar">
@@ -83,7 +88,7 @@ export default function SchoolSelector() {
             onClick={() => {
               localStorage.removeItem("va_isAdmin")
               localStorage.removeItem("va_admin_remembered")
-              navigate("/admin/login")
+              navigate("/")
             }}
             aria-label={t("schoolSelector.logout")}
           >
@@ -91,13 +96,12 @@ export default function SchoolSelector() {
           </button>
         )}
 
-        {/* Guest logout: permite borrar el id de invitado y acceder al login admin */}
         {!isAdmin && localStorage.getItem("villaacero_guest_id") && (
           <button
             className="btn-logout"
             onClick={() => {
               localStorage.removeItem("villaacero_guest_id")
-              navigate("/admin/login")
+              navigate("/")
             }}
             aria-label={t("schoolSelector.guestLogout")}
             title={t("schoolSelector.guestLogout")}
@@ -124,7 +128,7 @@ export default function SchoolSelector() {
             <button
               key={c}
               className={`chip ${comuna === c ? "active" : ""}`}
-              onClick={() => setComuna(c)}
+              onClick={() => selectComuna(c)}
             >
               {c === "Todas" ? t("schoolSelector.filterAll") : c}
             </button>

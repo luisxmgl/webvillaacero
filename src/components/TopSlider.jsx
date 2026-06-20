@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useMemo } from "react"
 import LanguageSwitcher from "./LanguageSwitcher.jsx"
 
 const SLIDE_IMAGES = [
@@ -45,19 +45,21 @@ const SLIDE_IMAGES = [
   "41.jpeg",
 ]
 
+const COLUMN_COUNT = 4
+// Cada columna dura distinto para que no se muevan todas en sincronía (efecto más orgánico).
+const COLUMN_DURATIONS = [34, 42, 38, 46]
+
+function splitIntoColumns(images, columns) {
+  const result = Array.from({ length: columns }, () => [])
+  images.forEach((src, i) => result[i % columns].push(src))
+  return result
+}
+
 export default function TopSlider() {
-  const slides = useMemo(
-    () => SLIDE_IMAGES.map((file) => `/slide/${file}`),
+  const columns = useMemo(
+    () => splitIntoColumns(SLIDE_IMAGES.map((file) => `/slide/${file}`), COLUMN_COUNT),
     []
   )
-  const [activeIndex, setActiveIndex] = useState(0)
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveIndex((current) => (current + 1) % slides.length)
-    }, 2000)
-    return () => clearInterval(interval)
-  }, [slides.length])
 
   return (
     <div className="global-top-banner">
@@ -68,13 +70,19 @@ export default function TopSlider() {
         loading="eager"
       />
       <LanguageSwitcher />
-      <div className="slide-frame" aria-label="Galería de imágenes de Villa Acero">
-        <img
-          src={slides[activeIndex]}
-          alt="Promoción de Villa Acero"
-          className="slide-image"
-          loading="eager"
-        />
+      <div className="marquee-wall" aria-label="Galería de imágenes de Villa Acero">
+        {columns.map((colImages, i) => (
+          <div className="marquee-col" key={i}>
+            <div
+              className={`marquee-col-track ${i % 2 === 1 ? "marquee-up" : "marquee-down"}`}
+              style={{ animationDuration: `${COLUMN_DURATIONS[i % COLUMN_DURATIONS.length]}s` }}
+            >
+              {[...colImages, ...colImages].map((src, j) => (
+                <img key={j} src={src} alt="" loading={j < colImages.length ? "eager" : "lazy"} />
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )

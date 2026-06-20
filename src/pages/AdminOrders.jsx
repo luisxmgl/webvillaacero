@@ -18,6 +18,12 @@ export default function AdminOrders() {
   }
 
   useEffect(() => {
+    if (localStorage.getItem("va_isAdmin") !== "1") navigate("/admin/login")
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (!db) return
     const pedidosRef = ref(db, "pedidos")
     const unsubscribe = onValue(pedidosRef, (snap) => {
       const data = snap.val() || {}
@@ -38,17 +44,21 @@ export default function AdminOrders() {
           ←
         </button>
         <h1 style={{ flex: 1 }}>{t("adminOrders.title")}</h1>
-        <button
-          className="btn btn-ghost"
-          onClick={() => {
-            localStorage.removeItem("va_isAdmin")
-            localStorage.removeItem("va_admin_remembered")
-            navigate("/admin/login")
-          }}
-          style={{ marginLeft: 8 }}
-        >
-          {t("adminOrders.logout")}
-        </button>
+        <div className="topbar-actions">
+          <button className="btn btn-ghost" onClick={() => navigate("/admin/caja")}>
+            {t("adminOrders.openCaja")}
+          </button>
+          <button
+            className="btn btn-ghost"
+            onClick={() => {
+              localStorage.removeItem("va_isAdmin")
+              localStorage.removeItem("va_admin_remembered")
+              navigate("/")
+            }}
+          >
+            {t("adminOrders.logout")}
+          </button>
+        </div>
       </div>
 
       <div className="content">
@@ -62,7 +72,15 @@ export default function AdminOrders() {
         {pedidos.map((p) => (
           <div key={p.codigoRetiro} className="stitch-card" style={{ marginBottom: 12 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-              <strong>#{p.codigoRetiro}</strong>
+              <strong>
+                #{p.codigoRetiro}
+                {p.origen === "pos" && (
+                  <span className="chat-badge new" style={{ marginLeft: 8 }}>
+                    {t("adminOrders.posLabel")}
+                    {p.metodoPago ? ` · ${t(`caja.method${p.metodoPago.charAt(0).toUpperCase()}${p.metodoPago.slice(1)}`)}` : ""}
+                  </span>
+                )}
+              </strong>
               <span style={{ fontFamily: "var(--font-display)", color: "var(--thread)" }}>
                 {formatPrice((p.total || 0) + (p.extraCharge || 0))}
               </span>

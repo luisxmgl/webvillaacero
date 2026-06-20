@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import { Outlet, useLocation, useNavigate } from "react-router-dom"
 import TopSlider from "./TopSlider.jsx"
 import NotificationsBell from "./NotificationsBell.jsx"
@@ -10,6 +11,7 @@ import cartIcon from "../../public/carrito-de-compras.png"
 import instagramIcon from "../../public/instagramicono.png"
 import { useCart } from "../context/CartContext.jsx"
 import { useLanguage } from "../context/LanguageContext.jsx"
+import { useNotifications } from "../hooks/useNotifications.js"
 
 export default function GlobalLayout() {
   const navigate = useNavigate()
@@ -19,6 +21,12 @@ export default function GlobalLayout() {
   const showFloatingActions = location.pathname !== "/admin/login"
   const { items } = useCart()
   const cartCount = items.reduce((s, i) => s + i.cantidad, 0)
+  const { items: notifItems, markSeen, markAllSeen } = useNotifications(isAdmin, t)
+  const hasUnreadChat = notifItems.some((n) => n.type === "chat")
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [location.pathname])
 
   return (
     <div className="app-with-slider">
@@ -43,8 +51,12 @@ export default function GlobalLayout() {
             className={`nav-item ${location.pathname === (isAdmin ? "/admin/mensajes" : "/chat") ? "active" : ""}`}
             aria-label={isAdmin ? t("nav.messages") : t("store.chat")}
             onClick={() => (window.location.href = isAdmin ? "/admin/mensajes" : "/chat")}
+            style={{ position: "relative" }}
           >
             <img src={chatIcon} alt="Chat" width={20} height={20} />
+            {hasUnreadChat && (
+              <span style={{ position: "absolute", top: -4, right: -6, background: "var(--thread)", borderRadius: "50%", width: 10, height: 10, border: "2px solid #fff" }} />
+            )}
             <span>{t("nav.messages")}</span>
           </button>
 
@@ -57,7 +69,7 @@ export default function GlobalLayout() {
             <span>{t("nav.management")}</span>
           </button>
 
-          <NotificationsBell isAdmin={isAdmin} />
+          <NotificationsBell items={notifItems} markSeen={markSeen} markAllSeen={markAllSeen} />
 
           <button
             className="nav-item"
@@ -71,7 +83,7 @@ export default function GlobalLayout() {
           <button
             className="nav-item cart-item"
             aria-label={t("nav.cart")}
-            onClick={() => navigate(isAdmin ? "/admin/pedidos" : "/carrito")}
+            onClick={() => navigate("/carrito")}
             style={{ position: "relative" }}
           >
             <img src={cartIcon} alt="Carrito" width={20} height={20} />
