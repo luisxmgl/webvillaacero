@@ -102,6 +102,46 @@ button {
   border-top: 1px solid var(--line);
 }
 
+/* Fila de respuestas rápidas del chat: una sola fila horizontal que se desliza con
+   el dedo, en vez de chips que se cortan o se envuelven en columna+fila a la vez
+   (el bug de .assistant-options compartido con CheckoutAssistant). overscroll-behavior
+   contiene el swipe acá adentro para que no se lo "roben" la página ni el chat. */
+.chat-quick-replies {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 8px;
+  margin: 0;
+  padding-bottom: 4px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.chat-quick-replies::-webkit-scrollbar {
+  display: none;
+}
+
+.chat-quick-replies button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  background: var(--paper-raised);
+  border: 1.5px solid var(--ink);
+  color: var(--ink);
+  border-radius: 20px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.chat-quick-replies button:hover {
+  background: var(--ink);
+  color: #fff;
+}
+
 .topbar {
   display: flex;
   align-items: center;

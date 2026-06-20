@@ -273,7 +273,7 @@ export default function Chat({ admin = false }) {
 
       <div className="chat-input-bar">
         {!admin && (
-          <div className="assistant-options" style={{ margin: 0 }}>
+          <div className="chat-quick-replies">
             <button type="button" onClick={() => enviarTexto(t("chat.quickSizesMessage"))}>{t("chat.quickSizes")}</button>
             <button type="button" onClick={() => enviarTexto(t("chat.quickOrderHelpMessage"))}>{t("chat.quickOrderHelp")}</button>
             <button type="button" onClick={() => enviarTexto(t("chat.quickDeliveryMessage"))}>{t("chat.quickDelivery")}</button>
