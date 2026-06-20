@@ -90,7 +90,12 @@ button {
 
 .marquee-wall {
   width: 100%;
+<<<<<<< HEAD
   height: 220px;
+=======
+  max-width: 800px;
+  aspect-ratio: 16 / 9;
+>>>>>>> fbb3efe84ff3050a48fc7241bd71ec4269942dfa
   overflow: hidden;
   display: flex;
   gap: 4px;
@@ -332,6 +337,7 @@ button {
 }
 
 @media (max-width: 520px) {
+<<<<<<< HEAD
   .marquee-wall {
     height: 150px;
   }
@@ -340,6 +346,8 @@ button {
     height: 110px;
   }
 
+=======
+>>>>>>> fbb3efe84ff3050a48fc7241bd71ec4269942dfa
   .logo-chip {
     width: 36px;
     height: 36px;
@@ -1161,6 +1169,15 @@ button:focus-visible {
 
 .chat-bubble .message-text {
   white-space: pre-wrap;
+}
+
+.chat-bubble-image {
+  display: block;
+  max-width: 100%;
+  width: 220px;
+  height: auto;
+  border-radius: 14px;
+  object-fit: cover;
 }
 
 .chat-bubble-typing .message-text {

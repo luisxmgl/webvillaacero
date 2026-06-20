@@ -82,6 +82,14 @@ export default function Icon({ name, size = 20, className = "", ...props }) {
           <path d="M12 8h.01M12 11v4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
         </svg>
       )
+    case "image":
+      return (
+        <svg {...common}>
+          <rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" strokeWidth="1.6" />
+          <circle cx="8.5" cy="9.5" r="1.5" stroke="currentColor" strokeWidth="1.6" />
+          <path d="M3.5 17l5-5 3 3 4-4.5 5.5 6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )
     case "store":
       return (
         <svg {...common}>
