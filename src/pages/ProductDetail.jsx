@@ -118,7 +118,15 @@ export default function ProductDetail() {
         <button
           className="btn btn-ghost"
           style={{ marginTop: 14 }}
-          onClick={() => openWhatsApp()}
+          onClick={() =>
+            openWhatsApp(
+              t("productDetail.whatsappQuery", {
+                product: producto.nombre,
+                size: producto.talla,
+                price: formatPrice(producto.precio),
+              })
+            )
+          }
         >
           {t("productDetail.consultWhatsapp")}
         </button>

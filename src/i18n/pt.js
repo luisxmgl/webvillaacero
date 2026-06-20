@@ -56,6 +56,7 @@ export default {
     addToCart: "Adicionar ao carrinho",
     redeemFor: "Trocar por {points} Villa Pontos",
     consultWhatsapp: "Consultar pelo WhatsApp",
+    whatsappQuery: "Olá! Gostaria de saber sobre este produto: {product}, tamanho {size}, preço {price}.",
     insufficientPoints: "Você não tem Villa Pontos suficientes (você tem: {points})",
     redeemSuccess: "Troca realizada com sucesso! Seu código: {code}",
     completeUniform: "Complete o uniforme",
