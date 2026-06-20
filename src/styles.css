@@ -795,9 +795,9 @@ button:focus-visible {
 
 .bottom-nav {
   position: fixed;
-  left: 50%;
-  bottom: 36px;
-  transform: translateX(-50%);
+  right: 8px;
+  top: 50%;
+  transform: translateY(calc(-50% + 40px));
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -979,7 +979,9 @@ button:focus-visible {
   .bottom-nav {
     left: 0;
     right: 0;
+    top: auto;
     bottom: 0;
+    transform: none;
     width: 100%;
     max-width: 100%;
     flex-direction: row;
