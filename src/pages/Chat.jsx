@@ -16,12 +16,7 @@ export default function Chat({ admin = false }) {
   const [messages, setMessages] = useState([])
   const [text, setText] = useState("")
   const bottomRef = useRef(null)
-<<<<<<< HEAD
-=======
-  const greetedRef = useRef(false)
-  const awaitingOrderCodeRef = useRef(false)
   const fileInputRef = useRef(null)
->>>>>>> fbb3efe84ff3050a48fc7241bd71ec4269942dfa
 
   useEffect(() => {
     // El admin tiene su propia vista de chats (/admin/mensajes); si llega aquí
@@ -167,8 +162,6 @@ export default function Chat({ admin = false }) {
     enviarTexto(text)
   }
 
-<<<<<<< HEAD
-=======
   function readAndCompressImage(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
@@ -212,14 +205,6 @@ export default function Chat({ admin = false }) {
     }
   }
 
-  useEffect(() => {
-    if (admin || !chatId || !loaded || messages.length > 0 || greetedRef.current) return
-    greetedRef.current = true
-    sendBotMessage(t("chatbot.greeting"))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [admin, chatId, loaded, messages.length])
-
->>>>>>> fbb3efe84ff3050a48fc7241bd71ec4269942dfa
   function getSenderLabel(senderId) {
     if (senderId === currentUserId) return t("chat.senderYou")
     if (senderId === "admin" || senderId === "bot") return t("chat.senderStore")
