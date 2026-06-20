@@ -1,4 +1,4 @@
-// Equivalente web de Utils.kt, los getters de Producto.kt y PointsManager.kt
+// Equivalente web de Utils.kt y los getters de Producto.kt
 
 export const WHATSAPP_NUMBER = "56920680021"
 
@@ -20,13 +20,6 @@ export function buildProducto(raw, colegioNombre) {
 
   const tallaIndex = nombreUpper.indexOf(" T-")
   const talla = tallaIndex !== -1 ? nombre.substring(tallaIndex + 3).trim() : "N/A"
-
-  let costMultiplier = 1.0
-  if (nombreUpper.includes("PARKA") || nombreUpper.includes("CASACA")) costMultiplier = 1.2
-  else if (nombreUpper.includes("POLERA")) costMultiplier = 0.9
-  const puntosCost = Math.max(1000, Math.trunc(Math.floor(precio / 10) * costMultiplier))
-
-  const puntosEarn = calculateStablePointsEarn(raw.idproducto || nombre)
 
   let descripcion
   if (nombreUpper.includes("POLERON")) {
@@ -59,18 +52,8 @@ export function buildProducto(raw, colegioNombre) {
     stock,
     talla,
     colegio: colegioNombre,
-    puntosCost,
-    puntosEarn,
     descripcion,
   }
-}
-
-function calculateStablePointsEarn(seed) {
-  const hash = String(seed)
-    .split("")
-    .reduce((acc, char) => acc + char.charCodeAt(0), 0)
-  const random = ((hash % 96) + 5)
-  return Math.min(100, Math.max(5, random))
 }
 
 export function openWhatsApp(message, phone = WHATSAPP_NUMBER) {
@@ -93,30 +76,6 @@ export function generateOrderCode() {
     suffix += ORDER_CODE_ALPHABET[Math.floor(Math.random() * ORDER_CODE_ALPHABET.length)]
   }
   return `${dd}${mm}-${suffix}`
-}
-
-// --- Puntos de fidelidad (equivalente a PointsManager.kt, usa localStorage) ---
-const POINTS_KEY = "villaacero_points"
-
-export function getPoints() {
-  return parseInt(localStorage.getItem(POINTS_KEY) || "0", 10)
-}
-
-export function addPoints(amount) {
-  localStorage.setItem(POINTS_KEY, String(getPoints() + amount))
-}
-
-export function redeemPoints(amount) {
-  const current = getPoints()
-  if (current >= amount) {
-    localStorage.setItem(POINTS_KEY, String(current - amount))
-    return true
-  }
-  return false
-}
-
-export function calculateTotalPoints(items) {
-  return items.reduce((sum, item) => sum + item.producto.puntosEarn * item.cantidad, 0)
 }
 
 // --- Pedidos guardados localmente (equivalente a LocalOrdersManager.kt) ---
@@ -147,14 +106,13 @@ export function getGuestId() {
 }
 
 // --- Identidad de la sesión actual: distingue admin de cada invitado, para que
-// el carrito, los puntos y los pedidos de una persona no se filtren a la siguiente
-// persona que use el mismo navegador (ver CartContext.jsx, donde se usa para
-// limpiar el estado personal cada vez que la identidad cambia). ---
+// el carrito y los pedidos de una persona no se filtren a la siguiente persona
+// que use el mismo navegador (ver CartContext.jsx, donde se usa para limpiar el
+// estado personal cada vez que la identidad cambia). ---
 export function getCurrentIdentity() {
   return localStorage.getItem("va_isAdmin") === "1" ? "admin" : getGuestId()
 }
 
 export function resetPersonalState() {
-  localStorage.removeItem(POINTS_KEY)
   localStorage.removeItem(ORDERS_KEY)
 }

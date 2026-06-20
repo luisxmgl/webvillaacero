@@ -13,8 +13,8 @@ export function CartProvider({ children }) {
   // qué pantalla se visite -- pero admin e invitados (y un invitado distinto que
   // use el mismo equipo) son personas distintas. Cada vez que la identidad actual
   // cambia (lo cual siempre ocurre junto con una navegación: login o "cerrar
-  // sesión"), se vacía el carrito y el estado personal (puntos, pedidos
-  // guardados) para que nadie vea lo que eligió la persona anterior.
+  // sesión"), se vacía el carrito y el estado personal (pedidos guardados)
+  // para que nadie vea lo que eligió la persona anterior.
   useEffect(() => {
     const current = getCurrentIdentity()
     if (identityRef.current === null) {

@@ -4,14 +4,7 @@ import { ref, set } from "firebase/database"
 import { db } from "../firebase.js"
 import { useCart } from "../context/CartContext.jsx"
 import { useLanguage } from "../context/LanguageContext.jsx"
-import {
-  formatPrice,
-  openWhatsApp,
-  generateOrderCode,
-  saveLocalOrder,
-  addPoints,
-  calculateTotalPoints,
-} from "../utils.js"
+import { formatPrice, openWhatsApp, generateOrderCode, saveLocalOrder } from "../utils.js"
 import CheckoutAssistant from "../components/CheckoutAssistant.jsx"
 import ConfirmationModal from "../components/ConfirmationModal.jsx"
 
@@ -24,8 +17,6 @@ export default function Cart() {
   const [pendingMethod, setPendingMethod] = useState(null) // "whatsapp" | "webpay"
   const [confirmedCode, setConfirmedCode] = useState(null)
   const [webpayError, setWebpayError] = useState("")
-
-  const pointsToEarn = calculateTotalPoints(items)
 
   function iniciarCheckout(method) {
     setPendingMethod(method)
@@ -73,9 +64,6 @@ export default function Cart() {
         })
         if (!resp.ok) throw new Error("create failed")
         const { token, url } = await resp.json()
-        // Los puntos solo deben acreditarse si Transbank confirma el pago (ver PagoResultado.jsx);
-        // se guardan aquí para no perderlos al salir del sitio hacia el banco.
-        localStorage.setItem(`va_pending_points_${orderCode}`, String(pointsToEarn))
         // Transbank exige un POST real del navegador con token_ws, no un fetch/XHR.
         const form = document.createElement("form")
         form.method = "POST"
@@ -94,8 +82,6 @@ export default function Cart() {
         return
       }
     }
-
-    addPoints(pointsToEarn)
 
     let msg = `${t("cart.orderMessageHeader")}\n\n${t("cart.orderCodeLabel")}: ${orderCode}\n------------------------------\n`
     items.forEach((i) => {
@@ -182,11 +168,6 @@ export default function Cart() {
                 <span>{t("cart.total")}</span>
                 <span style={{ color: "var(--thread)" }}>{formatPrice(total)}</span>
               </div>
-              {!isAdmin && (
-                <p style={{ fontSize: 12.5, color: "var(--muted)", marginTop: 8 }}>
-                  {t("cart.pointsEarn", { points: pointsToEarn })}
-                </p>
-              )}
             </div>
 
             {isAdmin ? (

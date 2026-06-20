@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import { ref, push, set } from "firebase/database"
-import { db } from "../firebase.js"
-import { buildProducto, formatPrice, openWhatsApp, getPoints, redeemPoints, generateOrderCode, saveLocalOrder } from "../utils.js"
+import { buildProducto, formatPrice, openWhatsApp } from "../utils.js"
 import { useCart } from "../context/CartContext.jsx"
 import { useLanguage } from "../context/LanguageContext.jsx"
 
@@ -14,8 +12,6 @@ export default function ProductDetail() {
   const isAdmin = localStorage.getItem("va_isAdmin") === "1"
   const [producto, setProducto] = useState(null)
   const [relacionados, setRelacionados] = useState([])
-  const [confirmando, setConfirmando] = useState(false)
-  const [mensaje, setMensaje] = useState("")
 
   useEffect(() => {
     fetch("/catalogo.json")
@@ -45,40 +41,6 @@ export default function ProductDetail() {
   function handleAgregar() {
     addItem(producto)
     navigate(-1)
-  }
-
-  function handleCanjear() {
-    const puntos = getPoints()
-    if (puntos < producto.puntosCost) {
-      setMensaje(t("productDetail.insufficientPoints", { points: puntos }))
-      return
-    }
-    setConfirmando(true)
-  }
-
-  async function confirmarCanje() {
-    if (!redeemPoints(producto.puntosCost)) return
-    const orderCode = generateOrderCode()
-    const pedido = {
-      id: orderCode,
-      codigoRetiro: orderCode,
-      items: [{ nombre: producto.nombre, talla: producto.talla, precio: 0, cantidad: 1, colegio: producto.colegio }],
-      total: 0,
-      extraCharge: 0,
-      customization: "CANJE POR VILLA PUNTOS",
-      estado: 1,
-      fecha: Date.now(),
-      procesado: false,
-    }
-    try {
-      await set(ref(db, `pedidos/${orderCode}`), pedido)
-    } catch (e) {
-      console.error("Error al guardar en Firebase", e)
-    }
-    saveLocalOrder(orderCode)
-    setMensaje(t("productDetail.redeemSuccess", { code: orderCode }))
-    setConfirmando(false)
-    setTimeout(() => navigate(-1), 1800)
   }
 
   return (
@@ -113,12 +75,6 @@ export default function ProductDetail() {
         </button>
 
         {!isAdmin && (
-          <button className="btn btn-outline" style={{ marginTop: 10 }} onClick={handleCanjear}>
-            {t("productDetail.redeemFor", { points: producto.puntosCost })}
-          </button>
-        )}
-
-        {!isAdmin && (
           <button
             className="btn btn-ghost"
             style={{ marginTop: 14 }}
@@ -135,8 +91,6 @@ export default function ProductDetail() {
             {t("productDetail.consultWhatsapp")}
           </button>
         )}
-
-        {mensaje && <p style={{ marginTop: 14, fontSize: 13.5, color: "var(--ink)" }}>{mensaje}</p>}
 
         {relacionados.length > 0 && (
           <>
@@ -159,23 +113,6 @@ export default function ProductDetail() {
           </>
         )}
       </div>
-
-      {confirmando && (
-        <div className="modal-overlay" onClick={() => setConfirmando(false)}>
-          <div className="modal-sheet" onClick={(e) => e.stopPropagation()}>
-            <h3 style={{ fontFamily: "var(--font-display)" }}>{t("productDetail.redeemModalTitle")}</h3>
-            <p style={{ color: "var(--muted)", fontSize: 14 }}>
-              {t("productDetail.redeemModalBody", { product: producto.nombre, points: producto.puntosCost })}
-            </p>
-            <button className="btn btn-primary" style={{ marginTop: 14 }} onClick={confirmarCanje}>
-              {t("productDetail.redeemConfirm")}
-            </button>
-            <button className="btn btn-ghost" style={{ marginTop: 10 }} onClick={() => setConfirmando(false)}>
-              {t("productDetail.cancel")}
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
