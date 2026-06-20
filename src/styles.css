@@ -1512,4 +1512,23 @@ button:focus-visible {
     left: 0;
     width: 100%;
   }
+  /* visibility:hidden no saca del flujo a la barra superior, el footer, el menú
+     flotante ni el resto del contenido de la página -- seguían reservando su alto
+     completo (varios "100vh" apilados) e imprimían una hoja extra en blanco tras
+     la boleta. Hay que colapsarlos con display:none y anular los min-height. */
+  .global-top-banner,
+  .bottom-nav,
+  .site-footer,
+  .topbar,
+  .no-print {
+    display: none !important;
+  }
+  .app-with-slider,
+  .route-wrapper,
+  .screen {
+    min-height: 0 !important;
+  }
+  .content {
+    padding: 0 !important;
+  }
 }

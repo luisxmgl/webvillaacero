@@ -10,6 +10,7 @@ export default function Store() {
   const navigate = useNavigate()
   const { items } = useCart()
   const { t } = useLanguage()
+  const isAdmin = localStorage.getItem("va_isAdmin") === "1"
 
   const [colegio, setColegio] = useState(null)
   const [filtro, setFiltro] = useState("ALL")
@@ -59,9 +60,11 @@ export default function Store() {
           ←
         </button>
         <h1 style={{ flex: 1 }}>{colegio ? colegio.nombre : t("store.defaultTitle")}</h1>
-        <button className="back" onClick={() => openWhatsApp(t("store.whatsappMessage", { school: colegio?.nombre ?? "" }))} aria-label={t("store.whatsapp")}>
-          <Icon name="whatsapp" size={18} />
-        </button>
+        {!isAdmin && (
+          <button className="back" onClick={() => openWhatsApp(t("store.whatsappMessage", { school: colegio?.nombre ?? "" }))} aria-label={t("store.whatsapp")}>
+            <Icon name="whatsapp" size={18} />
+          </button>
+        )}
         <button className="back" onClick={() => navigate("/chat")} aria-label={t("store.chat")}>
           <Icon name="chat" size={18} />
         </button>

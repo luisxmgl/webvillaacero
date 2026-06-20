@@ -81,12 +81,18 @@ export function openWhatsApp(message, phone = WHATSAPP_NUMBER) {
   window.open(url, "_blank")
 }
 
+// Sin 0/O ni 1/I/L, para que no se confundan al leerlo o escribirlo a mano.
+const ORDER_CODE_ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ"
+
 export function generateOrderCode() {
   const now = new Date()
   const dd = String(now.getDate()).padStart(2, "0")
   const mm = String(now.getMonth() + 1).padStart(2, "0")
-  const random = String(Math.floor(1000 + Math.random() * 9000))
-  return `${dd[0]}${mm[0]}${random[0]}${random[1]}`
+  let suffix = ""
+  for (let i = 0; i < 4; i++) {
+    suffix += ORDER_CODE_ALPHABET[Math.floor(Math.random() * ORDER_CODE_ALPHABET.length)]
+  }
+  return `${dd}${mm}-${suffix}`
 }
 
 // --- Puntos de fidelidad (equivalente a PointsManager.kt, usa localStorage) ---

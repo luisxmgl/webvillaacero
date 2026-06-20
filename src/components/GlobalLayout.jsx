@@ -9,6 +9,7 @@ import chatIcon from "../../public/chat_icono.png"
 import whatsappIcon from "../../public/chatwhatsapp.png"
 import cartIcon from "../../public/carrito-de-compras.png"
 import instagramIcon from "../../public/instagramicono.png"
+import cajaIcon from "../../public/icons8-cashier-55.png"
 import { useCart } from "../context/CartContext.jsx"
 import { useLanguage } from "../context/LanguageContext.jsx"
 import { useNotifications } from "../hooks/useNotifications.js"
@@ -18,7 +19,11 @@ export default function GlobalLayout() {
   const location = useLocation()
   const { t } = useLanguage()
   const isAdmin = localStorage.getItem("va_isAdmin") === "1"
-  const showFloatingActions = location.pathname !== "/admin/login"
+  // El menú flotante solo tiene sentido una vez que alguien "inició sesión" (invitado o
+  // admin): ambos eligen su rol desde "/", y el admin además pasa por "/admin/login".
+  // El logout (guest o admin) siempre redirige a "/", así que ocultarlo ahí también lo
+  // hace desaparecer automáticamente al cerrar sesión.
+  const showFloatingActions = location.pathname !== "/" && location.pathname !== "/admin/login"
   const { items } = useCart()
   const cartCount = items.reduce((s, i) => s + i.cantidad, 0)
   const { items: notifItems, markSeen, markAllSeen } = useNotifications(isAdmin, t)
@@ -38,14 +43,16 @@ export default function GlobalLayout() {
 
       {showFloatingActions && (
         <nav className="bottom-nav">
-          <button
-            className={`nav-item whatsapp-item`}
-            aria-label={t("nav.whatsapp")}
-            onClick={() => window.open('https://wa.me/56920680021', '_blank')}
-          >
-            <img src={whatsappIcon} alt="WhatsApp" width={24}  height={24} />
-            <span>{t("nav.whatsapp")}</span>
-          </button>
+          {!isAdmin && (
+            <button
+              className={`nav-item whatsapp-item`}
+              aria-label={t("nav.whatsapp")}
+              onClick={() => window.open('https://wa.me/56920680021', '_blank')}
+            >
+              <img src={whatsappIcon} alt="WhatsApp" width={24}  height={24} />
+              <span>{t("nav.whatsapp")}</span>
+            </button>
+          )}
 
           <button
             className={`nav-item ${location.pathname === (isAdmin ? "/admin/mensajes" : "/chat") ? "active" : ""}`}
@@ -68,6 +75,17 @@ export default function GlobalLayout() {
             <img src={gestionIcon} alt="Gestión" width={20} height={20} />
             <span>{t("nav.management")}</span>
           </button>
+
+          {isAdmin && (
+            <button
+              className={`nav-item ${location.pathname === "/admin/caja" ? "active" : ""}`}
+              aria-label={t("nav.caja")}
+              onClick={() => navigate("/admin/caja")}
+            >
+              <img src={cajaIcon} alt="" width={20} height={20} />
+              <span>{t("nav.caja")}</span>
+            </button>
+          )}
 
           <NotificationsBell items={notifItems} markSeen={markSeen} markAllSeen={markAllSeen} />
 

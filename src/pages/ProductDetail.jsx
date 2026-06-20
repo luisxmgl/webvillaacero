@@ -11,6 +11,7 @@ export default function ProductDetail() {
   const navigate = useNavigate()
   const { addItem } = useCart()
   const { t } = useLanguage()
+  const isAdmin = localStorage.getItem("va_isAdmin") === "1"
   const [producto, setProducto] = useState(null)
   const [relacionados, setRelacionados] = useState([])
   const [confirmando, setConfirmando] = useState(false)
@@ -108,28 +109,32 @@ export default function ProductDetail() {
         <hr className="stitch-divider" />
 
         <button className="btn btn-primary" onClick={handleAgregar}>
-          {t("productDetail.addToCart")}
+          {isAdmin ? t("productDetail.addToCaja") : t("productDetail.addToCart")}
         </button>
 
-        <button className="btn btn-outline" style={{ marginTop: 10 }} onClick={handleCanjear}>
-          {t("productDetail.redeemFor", { points: producto.puntosCost })}
-        </button>
+        {!isAdmin && (
+          <button className="btn btn-outline" style={{ marginTop: 10 }} onClick={handleCanjear}>
+            {t("productDetail.redeemFor", { points: producto.puntosCost })}
+          </button>
+        )}
 
-        <button
-          className="btn btn-ghost"
-          style={{ marginTop: 14 }}
-          onClick={() =>
-            openWhatsApp(
-              t("productDetail.whatsappQuery", {
-                product: producto.nombre,
-                size: producto.talla,
-                price: formatPrice(producto.precio),
-              })
-            )
-          }
-        >
-          {t("productDetail.consultWhatsapp")}
-        </button>
+        {!isAdmin && (
+          <button
+            className="btn btn-ghost"
+            style={{ marginTop: 14 }}
+            onClick={() =>
+              openWhatsApp(
+                t("productDetail.whatsappQuery", {
+                  product: producto.nombre,
+                  size: producto.talla,
+                  price: formatPrice(producto.precio),
+                })
+              )
+            }
+          >
+            {t("productDetail.consultWhatsapp")}
+          </button>
+        )}
 
         {mensaje && <p style={{ marginTop: 14, fontSize: 13.5, color: "var(--ink)" }}>{mensaje}</p>}
 

@@ -26,13 +26,16 @@ export default function Tracking() {
   }
 
   async function buscar(c) {
-    const target = c ?? code
-    if (!target.trim()) return
+    const raw = c ?? code
+    if (!raw.trim()) return
+    // Los códigos generados ahora incluyen letras (ver generateOrderCode en utils.js);
+    // se normaliza a mayúsculas para que la búsqueda no falle por cómo lo tipeó el cliente.
+    const target = raw.trim().toUpperCase()
     setError("")
     setPedido(null)
     setLoading(true)
     try {
-      const snap = await get(ref(db, `pedidos/${target.trim()}`))
+      const snap = await get(ref(db, `pedidos/${target}`))
       if (snap.exists()) {
         setPedido(snap.val())
       } else {

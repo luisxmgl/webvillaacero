@@ -336,7 +336,7 @@ export default function Caja() {
 
         {step === "recibo" && pedidoFinal && (
           <>
-            {warning && <p className="chat-banner" style={{ color: "var(--thread)" }}>{warning}</p>}
+            {warning && <p className="chat-banner no-print" style={{ color: "var(--thread)" }}>{warning}</p>}
 
             <div className="receipt stitch-card">
               <div style={{ textAlign: "center" }}>
@@ -423,7 +423,7 @@ export default function Caja() {
               <p style={{ textAlign: "center", fontSize: 11, color: "var(--muted)" }}>{t("caja.receiptKeep")}</p>
             </div>
 
-            <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
+            <div className="no-print" style={{ display: "flex", gap: 10, marginTop: 16 }}>
               <button className="btn btn-outline" onClick={() => window.print()}>
                 {t("caja.printButton")}
               </button>

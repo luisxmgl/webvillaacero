@@ -6,6 +6,7 @@ export default {
     whatsapp: "WhatsApp",
     messages: "Mensagens",
     management: "Gestão",
+    caja: "Caixa",
     instagram: "Ver Instagram",
     cart: "Carrinho",
     notifications: "Notificações",
@@ -54,6 +55,7 @@ export default {
   productDetail: {
     loading: "Carregando...",
     addToCart: "Adicionar ao carrinho",
+    addToCaja: "Adicionar ao caixa",
     redeemFor: "Trocar por {points} Villa Pontos",
     consultWhatsapp: "Consultar pelo WhatsApp",
     whatsappQuery: "Olá! Gostaria de saber sobre este produto: {product}, tamanho {size}, preço {price}.",
