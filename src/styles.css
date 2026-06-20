@@ -15,12 +15,21 @@
 
 * {
   box-sizing: border-box;
+  /* Sin esto, cada botón/tarjeta tocado en el celular destella en gris -- el típico
+     detalle que delata "esto es una página web", no una app. */
+  -webkit-tap-highlight-color: transparent;
 }
 
 html,
 body,
 #root {
   height: 100%;
+}
+
+html {
+  /* Evita el "rebote" de scroll (pull-to-refresh / overscroll) que se siente a web,
+     no a app nativa. */
+  overscroll-behavior-y: none;
 }
 
 body {
@@ -31,6 +40,14 @@ body {
   font-style: normal;
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+
+button,
+a {
+  /* Quita el delay de ~300ms y el doble-tap-para-zoom en táctil; los botones
+     responden al toque en vez de sentirse con un retraso. */
+  touch-action: manipulation;
 }
 
 a {
@@ -68,6 +85,10 @@ button {
 .chat-screen .content {
   overflow-y: auto;
   padding-bottom: 16px;
+  /* Sin esto, un hijo flex no se encoge más allá del tamaño de su contenido (el
+     "empty state" del chat, por ejemplo) y termina empujando la barra de escribir
+     fuera de la pantalla en vez de hacer scroll él mismo. */
+  min-height: 0;
 }
 
 .chat-input-bar {
@@ -992,7 +1013,9 @@ button:focus-visible {
 @media (max-width: 640px) {
   .content {
     padding: 16px;
-    padding-bottom: 112px;
+    /* Deja sitio para el menú flotante de abajo y, en iPhones con home indicator,
+       para esa franja segura también. */
+    padding-bottom: calc(112px + env(safe-area-inset-bottom));
   }
 
   .school-row {
@@ -1018,6 +1041,8 @@ button:focus-visible {
     justify-content: space-around;
     gap: 2px;
     padding: 6px;
+    /* En iPhones con home indicator, que el menú no quede pegado/tapado por esa franja. */
+    padding-bottom: max(6px, env(safe-area-inset-bottom));
     border-radius: 18px 18px 0 0;
   }
 

@@ -38,10 +38,14 @@ export default function GlobalLayout() {
 
   return (
     <div className="app-with-slider">
-      <TopSlider />
+      {/* El chat se trata como pantalla completa "de app": su barra de escribir
+          asume que tiene los 100dvh enteros para sí misma (ver styles.css,
+          .chat-screen) -- el banner y el footer le quitarían ese espacio y la
+          empujarían fuera de la vista inicial, obligando a hacer scroll para verla. */}
+      {!isChatRoute && <TopSlider />}
       <div className="route-wrapper">
         <Outlet />
-        <Footer />
+        {!isChatRoute && <Footer />}
       </div>
 
       {showFloatingActions && (
