@@ -212,7 +212,7 @@ export default function Chat({ admin = false }) {
   }
 
   return (
-    <div className="screen">
+    <div className="screen chat-screen">
       <div className="topbar">
         <button className="back" onClick={() => navigate(-1)} aria-label="Volver">
           <Icon name="back" size={18} />
@@ -236,7 +236,7 @@ export default function Chat({ admin = false }) {
         )}
       </div>
 
-      <div className="content" style={{ display: "flex", flexDirection: "column", flex: 1, paddingBottom: admin ? 90 : 220 }}>
+      <div className="content" style={{ display: "flex", flexDirection: "column", flex: 1 }}>
         {!db && (
           <div className="chat-banner">
             {t("chat.offlineBanner")}
@@ -271,22 +271,7 @@ export default function Chat({ admin = false }) {
         <div ref={bottomRef} />
       </div>
 
-      <div
-        style={{
-          position: "fixed",
-          bottom: 0,
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "100%",
-          maxWidth: 480,
-          display: "flex",
-          flexDirection: "column",
-          gap: 8,
-          padding: 12,
-          background: "var(--paper)",
-          borderTop: "1px solid var(--line)",
-        }}
-      >
+      <div className="chat-input-bar">
         {!admin && (
           <div className="assistant-options" style={{ margin: 0 }}>
             <button type="button" onClick={() => enviarTexto(t("chat.quickSizesMessage"))}>{t("chat.quickSizes")}</button>

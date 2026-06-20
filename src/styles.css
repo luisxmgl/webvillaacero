@@ -52,6 +52,35 @@ button {
   position: relative;
 }
 
+/* El chat necesita una barra para escribir siempre visible sin usar position:fixed:
+   en el navegador del celular, "fixed" se calcula contra un alto de viewport que no
+   coincide con el área realmente visible cuando aparece/desaparece la barra de
+   direcciones (o el teclado), y la barra termina quedando fuera de pantalla. En vez
+   de eso, se fija el alto real de la pantalla (100dvh = alto visible de verdad en
+   navegadores que lo soportan) y la barra de escribir queda como un hijo flex más
+   abajo de .content, que es la única parte que hace scroll. */
+.chat-screen {
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.chat-screen .content {
+  overflow-y: auto;
+  padding-bottom: 16px;
+}
+
+.chat-input-bar {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+  background: var(--paper);
+  border-top: 1px solid var(--line);
+}
+
 .topbar {
   display: flex;
   align-items: center;

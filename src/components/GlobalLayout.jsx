@@ -23,7 +23,10 @@ export default function GlobalLayout() {
   // admin): ambos eligen su rol desde "/", y el admin además pasa por "/admin/login".
   // El logout (guest o admin) siempre redirige a "/", así que ocultarlo ahí también lo
   // hace desaparecer automáticamente al cerrar sesión.
-  const showFloatingActions = location.pathname !== "/" && location.pathname !== "/admin/login"
+  // En el chat también se oculta: Chat.jsx ya tiene su propia barra fija para escribir
+  // pegada abajo, y en mobile el menú flotante (también fijo abajo) queda encima y la tapa.
+  const isChatRoute = location.pathname === "/chat" || location.pathname.startsWith("/admin/chat/")
+  const showFloatingActions = location.pathname !== "/" && location.pathname !== "/admin/login" && !isChatRoute
   const { items } = useCart()
   const cartCount = items.reduce((s, i) => s + i.cantidad, 0)
   const { items: notifItems, markSeen, markAllSeen } = useNotifications(isAdmin, t)
