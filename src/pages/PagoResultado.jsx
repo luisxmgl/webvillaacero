@@ -1,6 +1,8 @@
+import { useEffect } from "react"
 import { useSearchParams, useNavigate } from "react-router-dom"
 import { useLanguage } from "../context/LanguageContext.jsx"
 import ConfirmationModal from "../components/ConfirmationModal.jsx"
+import { addPoints } from "../utils.js"
 
 export default function PagoResultado() {
   const [searchParams] = useSearchParams()
@@ -9,6 +11,15 @@ export default function PagoResultado() {
 
   const orderCode = searchParams.get("orderCode") || ""
   const estado = searchParams.get("estado") || "error"
+
+  useEffect(() => {
+    if (!orderCode) return
+    const key = `va_pending_points_${orderCode}`
+    const pending = localStorage.getItem(key)
+    if (!pending) return
+    if (estado === "ok") addPoints(Number(pending))
+    localStorage.removeItem(key)
+  }, [estado, orderCode])
 
   if (estado === "ok" && orderCode) {
     return <ConfirmationModal orderCode={orderCode} onClose={() => navigate("/colegios")} />

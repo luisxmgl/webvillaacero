@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import { buildProducto, formatPrice, openWhatsApp } from "../utils.js"
 import { useCart } from "../context/CartContext.jsx"
 import { useLanguage } from "../context/LanguageContext.jsx"
+import Icon from "../components/Icons.jsx"
 
 export default function Store() {
   const { colegioId } = useParams()
@@ -59,8 +60,10 @@ export default function Store() {
         </button>
         <h1 style={{ flex: 1 }}>{colegio ? colegio.nombre : t("store.defaultTitle")}</h1>
         <button className="back" onClick={() => openWhatsApp(t("store.whatsappMessage", { school: colegio?.nombre ?? "" }))} aria-label={t("store.whatsapp")}>
+          <Icon name="whatsapp" size={18} />
         </button>
         <button className="back" onClick={() => navigate("/chat")} aria-label={t("store.chat")}>
+          <Icon name="chat" size={18} />
         </button>
       </div>
 

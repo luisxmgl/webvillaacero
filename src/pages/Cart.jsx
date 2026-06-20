@@ -64,8 +64,6 @@ export default function Cart() {
       console.error("Error al guardar en Firebase", e)
     }
 
-    addPoints(pointsToEarn)
-
     if (pendingMethod === "webpay") {
       try {
         const resp = await fetch("/api/webpay/create", {
@@ -75,6 +73,9 @@ export default function Cart() {
         })
         if (!resp.ok) throw new Error("create failed")
         const { token, url } = await resp.json()
+        // Los puntos solo deben acreditarse si Transbank confirma el pago (ver PagoResultado.jsx);
+        // se guardan aquí para no perderlos al salir del sitio hacia el banco.
+        localStorage.setItem(`va_pending_points_${orderCode}`, String(pointsToEarn))
         // Transbank exige un POST real del navegador con token_ws, no un fetch/XHR.
         const form = document.createElement("form")
         form.method = "POST"
@@ -93,6 +94,8 @@ export default function Cart() {
         return
       }
     }
+
+    addPoints(pointsToEarn)
 
     let msg = `${t("cart.orderMessageHeader")}\n\n${t("cart.orderCodeLabel")}: ${orderCode}\n------------------------------\n`
     items.forEach((i) => {

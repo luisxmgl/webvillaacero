@@ -18,8 +18,8 @@ export function buildProducto(raw, colegioNombre) {
   const nombre = raw.producto.trim()
   const nombreUpper = nombre.toUpperCase()
 
-  const tallaIndex = nombreUpper.indexOf(" TALLA ")
-  const talla = tallaIndex !== -1 ? nombre.substring(tallaIndex + 7).trim() : "N/A"
+  const tallaIndex = nombreUpper.indexOf(" T-")
+  const talla = tallaIndex !== -1 ? nombre.substring(tallaIndex + 3).trim() : "N/A"
 
   let costMultiplier = 1.0
   if (nombreUpper.includes("PARKA") || nombreUpper.includes("CASACA")) costMultiplier = 1.2
