@@ -79,6 +79,10 @@ button {
 .chat-screen {
   height: 100vh;
   height: 100dvh;
+  /* --chat-vh la fija Chat.jsx desde window.visualViewport.height (alto real
+     visible, a prueba de la barra de direcciones y el teclado); 100dvh queda
+     como respaldo si el navegador no soporta esa API. */
+  height: var(--chat-vh, 100dvh);
   overflow: hidden;
 }
 
@@ -89,6 +93,9 @@ button {
      "empty state" del chat, por ejemplo) y termina empujando la barra de escribir
      fuera de la pantalla en vez de hacer scroll él mismo. */
   min-height: 0;
+  /* Que el "rebote" de scroll al llegar al final de los mensajes no se lo pase a
+     la página completa (eso es lo que hacía sentir que "todo se movía"). */
+  overscroll-behavior: contain;
 }
 
 .chat-input-bar {

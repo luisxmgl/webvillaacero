@@ -19,6 +19,27 @@ export default function Chat({ admin = false }) {
   const fileInputRef = useRef(null)
 
   useEffect(() => {
+    // 100dvh ya cubre la mayoría de navegadores modernos, pero en algunos (Safari/
+    // Chrome más viejos, o ediciones raras de la barra de direcciones) puede no
+    // reaccionar al instante cuando esa barra aparece/desaparece o sale el teclado.
+    // window.visualViewport es compatible desde hace más tiempo y refleja el alto
+    // realmente visible en todo momento -- se usa para fijar el alto exacto en px,
+    // así la pantalla del chat (y la barra de abajo) nunca quedan mal calculadas.
+    if (!window.visualViewport) return
+    function setVh() {
+      document.documentElement.style.setProperty("--chat-vh", `${window.visualViewport.height}px`)
+    }
+    setVh()
+    window.visualViewport.addEventListener("resize", setVh)
+    window.visualViewport.addEventListener("scroll", setVh)
+    return () => {
+      window.visualViewport.removeEventListener("resize", setVh)
+      window.visualViewport.removeEventListener("scroll", setVh)
+      document.documentElement.style.removeProperty("--chat-vh")
+    }
+  }, [])
+
+  useEffect(() => {
     // El admin tiene su propia vista de chats (/admin/mensajes); si llega aquí
     // (por ejemplo escribiendo /chat directo en la URL) no debe usar la
     // identidad de invitado de este navegador, que es de otra persona.
