@@ -997,6 +997,27 @@ button:focus-visible {
   color: var(--muted);
 }
 
+.row-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 150ms ease, background-color 150ms ease;
+}
+
+.row-delete-btn:hover {
+  color: #dc2626;
+  background: rgba(220,38,38,0.1);
+}
+
 .bottom-nav button {
   min-height: 54px;
 }

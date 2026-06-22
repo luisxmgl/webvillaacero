@@ -218,6 +218,8 @@ export default {
     minutesAgo: "il y a {n} min",
     hoursAgo: "il y a {n} h",
     daysAgo: "il y a {n} j",
+    deleteChat: "Supprimer la conversation",
+    confirmDelete: "Supprimer la conversation avec {name} ? Cette action est irréversible.",
   },
   checkoutAssistant: {
     inicio: "Bonjour ! Je suis votre Assistant Villa Acero. Souhaitez-vous personnaliser votre vêtement avec des ajustements ou de la broderie ?",

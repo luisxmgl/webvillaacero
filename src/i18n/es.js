@@ -218,6 +218,8 @@ export default {
     minutesAgo: "hace {n} min",
     hoursAgo: "hace {n} h",
     daysAgo: "hace {n} d",
+    deleteChat: "Eliminar chat",
+    confirmDelete: "¿Eliminar la conversación con {name}? Esta acción no se puede deshacer.",
   },
   checkoutAssistant: {
     inicio: "¡Hola! Soy tu Asistente Villa Acero. ¿Te gustaría personalizar tu ropa con ajustes o bordados?",

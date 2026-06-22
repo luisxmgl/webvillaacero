@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { ref, onValue } from "firebase/database"
+import { ref, onValue, remove } from "firebase/database"
 import { db } from "../firebase.js"
 import { useLanguage } from "../context/LanguageContext.jsx"
+import Icon from "../components/Icons.jsx"
 
 function tiempoRelativo(timestamp, t) {
   if (!timestamp) return ""
@@ -133,6 +134,26 @@ export default function AdminChatList() {
     }
   }, [])
 
+  function eliminarChat(chatId, e) {
+    e.stopPropagation()
+    if (!window.confirm(t("adminChatList.confirmDelete", { name: chatId }))) return
+
+    if (db) {
+      remove(ref(db, `chats/${chatId}`))
+      remove(ref(db, `presence/${chatId}`))
+    } else {
+      localStorage.removeItem(`mock_chat_${chatId}`)
+      localStorage.removeItem(`presence_${chatId}`)
+      window.dispatchEvent(new Event("va-local-chat-updated"))
+    }
+    localStorage.removeItem(`opened_chat_${chatId}`)
+    setOpenedChats((prev) => {
+      const next = { ...prev }
+      delete next[chatId]
+      return next
+    })
+  }
+
   return (
     <div className="screen">
       <div className="topbar">
@@ -193,6 +214,15 @@ export default function AdminChatList() {
                 <div className="meta-time">{tiempoRelativo(c.ultimoTimestamp, t)}</div>
                 <span className={`chat-badge ${isNew ? "new" : "opened"}`}>{isNew ? t("adminChatList.statusNew") : t("adminChatList.statusOpened")}</span>
               </div>
+              <button
+                type="button"
+                className="row-delete-btn"
+                aria-label={t("adminChatList.deleteChat")}
+                title={t("adminChatList.deleteChat")}
+                onClick={(e) => eliminarChat(c.chatId, e)}
+              >
+                <Icon name="trash" size={16} />
+              </button>
             </div>
           )
         })}

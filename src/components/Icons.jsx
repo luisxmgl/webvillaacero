@@ -90,6 +90,13 @@ export default function Icon({ name, size = 20, className = "", ...props }) {
           <path d="M3.5 17l5-5 3 3 4-4.5 5.5 6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       )
+    case "trash":
+      return (
+        <svg {...common}>
+          <path d="M5 7h14M10 7V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2m-7 0 .8 11.2A2 2 0 0 0 9.8 20h4.4a2 2 0 0 0 2-1.8L17 7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M10 11v6M14 11v6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+        </svg>
+      )
     case "store":
       return (
         <svg {...common}>
